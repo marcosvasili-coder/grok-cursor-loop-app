@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.playwright/
+.grok_loop_state.json
+plans/grok-pm-specs/
+plans/debug/
+.playwright/screenshots/
+grok_selectors.json
+*.log
+
+# Local secrets — track only README + example in secrets/
+/secrets/*
+!/secrets/README.md
+!/secrets/example.env

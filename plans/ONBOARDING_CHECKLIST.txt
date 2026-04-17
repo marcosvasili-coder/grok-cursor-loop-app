@@ -1,0 +1,19 @@
+Grok Loop — manual steps (after venv + smoke_check)
+
+Phase 2 — First run
+  1. source .venv/bin/activate
+  2. python grok_loop_app.py
+  3. Optional clean login: rm .playwright/grok_storage.json
+  4. In the Chromium window, log in to Grok; wait until the app saves session (see log).
+
+Phase 3 — Handoff test
+  1. Sample file: plans/handoffs/feedback-test.md (already created)
+  2. In the GUI: Start Automatic Loop
+  3. Watch the live log; check plans/grok-pm-specs/ for downloads
+
+Phase 4 — If something fails
+  - Uncheck Headless to watch the browser
+  - Enable "Save screenshot on failure"; see plans/debug/screenshots/
+  - Tune grok_selectors.json or SELECTORS in grok_loop_app.py
+
+venv must use a Python with tkinter (this repo used: /usr/bin/python3 -m venv .venv).
