@@ -202,12 +202,17 @@ def storage_state_looks_valid() -> bool:
     except OSError:
         return False
 
-# Composer / chat — multiple fallbacks
+# Composer / chat — avoid bare "textarea" or generic contenteditable: those match login pages
+# and the app would type before Grok is signed in. Override via grok_selectors.json if Grok changes.
 SELECTORS = {
     "file_input": 'input[type="file"]',
     "composer": (
         'textarea[placeholder*="Ask"], textarea[placeholder*="ask"], '
-        'textarea[data-testid="composer"], div[contenteditable="true"], textarea'
+        'textarea[placeholder*="Message"], textarea[placeholder*="message"], '
+        'textarea[data-testid="composer"], [data-testid="composer"] textarea, '
+        'div[contenteditable="true"][data-testid*="composer"], '
+        'div[contenteditable="true"][aria-label*="Ask"], '
+        'div[contenteditable="true"][aria-label*="message"]'
     ),
     "send_button": (
         'button[aria-label*="Send"], button[type="submit"], '
@@ -560,7 +565,27 @@ class GrokAutomation:
 
     def _is_login_url(self, url: str) -> bool:
         u = url.lower()
-        return any(h in u for h in LOGIN_HOST_HINTS)
+        if any(h in u for h in LOGIN_HOST_HINTS):
+            return True
+        # Logged-out Grok sometimes stays on grok.com with /sign-in or similar in path
+        if "grok.com" in u and any(
+            p in u for p in ("/sign-in", "/signin", "/login", "/i/flow")
+        ):
+            return True
+        return False
+
+    def _login_wall_visible(self) -> bool:
+        """True if the page still looks like a login / sign-up flow (do not type into chat)."""
+        assert self._page is not None
+        if self._is_login_url(self._page.url):
+            return True
+        try:
+            pw = self._page.locator('input[type="password"]:visible').first
+            if pw.count() > 0 and pw.is_visible():
+                return True
+        except Exception:
+            pass
+        return False
 
     def navigate_grok(self) -> None:
         assert self._page is not None
@@ -599,6 +624,10 @@ class GrokAutomation:
                 self._log.info("Waiting for chat composer…")
                 last_log = now
 
+            if self._login_wall_visible():
+                self._page.wait_for_timeout(500)
+                continue
+
             for sel in SELECTORS["composer"].split(", "):
                 sel = sel.strip()
                 if not sel:
@@ -606,7 +635,7 @@ class GrokAutomation:
                 loc = self._page.locator(sel).first
                 try:
                     if loc.count() > 0 and loc.is_visible():
-                        self._log.info("Chat composer ready.")
+                        self._log.info("Chat composer ready (signed-in chat).")
                         self.save_storage()
                         return
                 except Exception:
@@ -663,6 +692,13 @@ class GrokAutomation:
         last_log = 0.0
         while time.time() < deadline:
             self._check_stop()
+            if self._login_wall_visible():
+                now = time.time()
+                if now - last_log > 10:
+                    self._log.info("Login screen detected — finish signing in; not typing yet.")
+                    last_log = now
+                self._page.wait_for_timeout(500)
+                continue
             for sel in SELECTORS["composer"].split(", "):
                 sel = sel.strip()
                 if not sel:
