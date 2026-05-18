@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "path=$(jq -r '.tool_input.file_path // empty'); case \"$path\" in *.env|*/secrets/local.env|*/secrets/*.env|*/.playwright/grok_storage.json|*/.grok_loop_state.json|*/requirements.txt|*/grok_selectors.json) echo \"Blocked: $path is a protected file (session, config, secrets, or deps lock). Edit by hand or confirm explicitly.\" >&2; exit 2 ;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "# GIT_GUARD\nINPUT=\"${CLAUDE_TOOL_INPUT:-}\"; BLOCK=0; MSG=''; if echo \"$INPUT\" | grep -qE 'git push.*--force(\\s|$)' && ! echo \"$INPUT\" | grep -q 'force-with-lease'; then BLOCK=1; MSG='BLOCKED: git push --force forbidden. Use --force-with-lease.'; fi; if echo \"$INPUT\" | grep -qE 'git push.*--force.*\\b(main|master)\\b'; then BLOCK=1; MSG='BLOCKED: force-push to main/master never allowed.'; fi; if echo \"$INPUT\" | grep -qE 'git reset --hard' && git rev-parse --abbrev-ref HEAD 2>/dev/null | grep -qE '^(main|master)$'; then BLOCK=1; MSG='BLOCKED: git reset --hard on main/master. Switch branches first.'; fi; if echo \"$INPUT\" | grep -qE 'git tag -d|git tag.*-f'; then BLOCK=1; MSG='BLOCKED: tag deletion or force-update. Confirm with developer first.'; fi; if [ \"$BLOCK\" -eq 1 ]; then echo \"$MSG\"; exit 1; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "path=$(jq -r '.tool_input.file_path // empty'); case \"$path\" in *.py) python3 -m py_compile \"$path\" 2>&1 || true ;; esac"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/smoke_check.py 2>&1 | tail -n 5 || true"
+          }
+        ]
+      }
+    ]
+  }
+}

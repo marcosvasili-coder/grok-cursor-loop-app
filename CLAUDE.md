@@ -70,3 +70,5 @@ When you discover something that would have helped you work in this repo better 
 - Before suggesting next steps, check `git log` and merged PRs first — the work may already be shipped.
 - After logic changes on a branch shared with Cursor, commit immediately. Treat uncommitted work on Cursor-shared branches as ephemeral.
 - For long outputs (audits, reviews, analyses): write to a markdown file, return summary + path rather than inlining in chat.
+- UI/UX reviews: default to a full screenshot walkthrough of all affected screens — not just the active change.
+- Before any multi-step or autonomous task, output a PREFLIGHT block: current dir + expected repo, current branch, clean working tree?, work already shipped that overlaps?, blockers. Stop if anything is off.
