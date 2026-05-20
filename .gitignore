@@ -14,3 +14,11 @@ grok_selectors.json
 /secrets/*
 !/secrets/README.md
 !/secrets/example.env
+
+# Claude Code local files
+CLAUDE.local.md
+.claude/setup-log.txt
+
+# Master-synced bootstrap scripts (canonical copies in ~/Desktop/Cursor Rules/)
+repo-init.sh
+setup-ai-context.sh

@@ -1,0 +1,13 @@
+---
+description: Self-improvement rule engine
+alwaysApply: true
+---
+
+When you complete any task:
+1. Repeated explanation already in rules → create new rule file
+2. Clarifying question answerable from code → add to index.mdc
+3. Better pattern found → update relevant rule file, note change
+4. Rule caused a mistake → flag with REVIEW comment for human
+
+New rule files: descriptive names, clear `description` field for
+auto-injection. Keep each rule file focused and short.

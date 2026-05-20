@@ -1,0 +1,15 @@
+---
+description: "When branching, merging, PRs, or post-task git cleanup — match CLAUDE.md Git workflow"
+---
+
+# Git workflow (Cursor)
+
+Integration branch for this repo: **main** (detected from `origin`; fallback `main`). Keep this file aligned with the `# Git workflow` section in `CLAUDE.md`.
+
+- **Integration branch:** merge finished work to **main**; keep it shippable.
+- **Feature branches:** short-lived, one purpose each; prefer clear names (`feat/…`, `fix/…`).
+- **After merge:** `git checkout main` && `git pull`, then delete the finished feature branch (and remote tracking branch when applicable).
+- **Sync:** prefer `git pull --rebase` on a feature branch before opening or updating a PR (optional: `git config pull.rebase true`).
+- **Agents / automation:** do not leave the checkout on incidental `cursor/…` branches without intent; return to **main** when a task is complete unless deliberately continuing feature work.
+
+<!-- setup-ai-context-git-workflow-mdc v1 -->

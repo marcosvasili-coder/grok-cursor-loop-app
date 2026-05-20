@@ -1,0 +1,42 @@
+---
+description: "When working with git — commits, branches, merges, pushes, releases"
+---
+
+# Git Workflow
+
+Solo developer hybrid workflow. Cursor agents work inline with the
+developer — be more conservative than Claude Code on git operations.
+
+## Branching decision
+**Direct commit to `main`** only for trivial changes.
+**Branch first** for everything else.
+When uncertain — branch. Ask the developer if unsure.
+
+## Branch naming
+`feat/` `fix/` `refactor/` `chore/` `docs/` prefixes.
+Kebab-case, under 40 characters.
+
+## Commit messages — conventional commits, mandatory
+Format: `<type>: <imperative subject under 72 chars>`
+Types: `feat` `fix` `refactor` `chore` `docs` `test` `ci`
+Imperative mood. One concept per commit.
+
+## Always confirm with developer before
+- Pushing to any remote
+- Merging anything into `main`
+- Creating a tag
+- Deleting a branch
+- Any rebase operation
+- Any operation involving `--force` or `--hard`
+
+## Never do, even with confirmation
+- `git push --force` to `main`
+- `git reset --hard` on `main`
+- Rebase a branch already pushed
+- Force-update an existing tag
+
+## Releases
+- Tag from `main` only, after merge
+- Annotated tags only
+- Semver strict
+- Builds reference the tag, never a branch
